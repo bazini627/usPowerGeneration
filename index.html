@@ -67,28 +67,28 @@
           center: [36,-94],
           zoom: 4,
       });
-      
-      var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-          subdomains: 'abcd',
-          maxZoom: 19
-      });  
-      
-      tiles.addTo(map);
-        
+
+      // Load map tiles from CARTO and add to map
+      var tiles = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a> | Map Authored by <a href="https://bazini627.github.io/" target="blank">Matthew Bacinskas</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+
+        tiles.addTo(map);
+
       // Styles we'll use for all markers
       var commonStyles = {
           weight: 1,
           stroke: 1,
           opacity: .8
       }
-      
+
       // Bring in our hydro layer
       var hydroLayer = L.geoJson(plants, {
           pointToLayer: function(feature,latlng) {
               return L.circleMarker(latlng, commonStyles);
           },
-          filter: function(feature) { 
+          filter: function(feature) {
             if(feature.properties.fuel_source.Hydro) {
                 return feature;
             }
@@ -102,39 +102,39 @@
           },
           onEachFeature : function (feature, layer) {
               var popUp = "<b>Plant Name: </b>" + feature.properties.plant_name + "<br>" + "<b>Plant Capacity: </b>" + feature.properties.capacity_mw.toLocaleString() + " MW" + "<br><br>" + "<u><b>" + "Fuel Type Breakdown:" + "</u></b><br>";
-              
+
               for (var source in feature.properties.fuel_source) {
                   popUp += "<b>" + source + ": </b>" + feature.properties.fuel_source[source].toLocaleString() + " MW" + ' '+ "<br>";
               }
               layer.bindPopup(popUp);
           }
       }).addTo(map);
-        
+
       // Filter out hydro plants within 500km of click
       map.on('click', function(e) {
           hydroLayer.eachLayer(function(layer) {
               var distance = e.latlng.distanceTo(layer.getLatLng())/1000; //distance in km
-              
+
               if(distance > 500) {
                   layer.setStyle({
                       stroke: false,
                       fill: false
-                  });  
+                  });
               } else {
                   layer.setStyle({
                       stroke: true,
-                      fill: true  
+                      fill: true
                   });
-              } 
+              }
           });
       });
-        
+
       // Bring in our nuclear layer
       var nuclearLayer = L.geoJson(plants, {
           pointToLayer: function(feature,latlng) {
               return L.circleMarker(latlng, commonStyles);
           },
-          filter: function(feature) { 
+          filter: function(feature) {
             if(feature.properties.fuel_source.Nuclear) {
                 return feature;
             }
@@ -148,39 +148,39 @@
           },
           onEachFeature : function (feature, layer) {
               var popUp = "<b>Plant Name: </b>" + feature.properties.plant_name + "<br>" + "<b>Plant Capacity: </b>" + feature.properties.capacity_mw.toLocaleString() + " MW" + "<br><br>" + "<u><b>" + "Fuel Type Breakdown:" + "</u></b><br>";
-              
+
               for (var source in feature.properties.fuel_source) {
                   popUp += "<b>" + source + ": </b>" + feature.properties.fuel_source[source].toLocaleString() + " MW" + ' '+ "<br>";
               }
               layer.bindPopup(popUp);
           }
       }).addTo(map);
-      
+
       // Filter out nuclear plants within 500km of click
       map.on('click', function(e) {
           nuclearLayer.eachLayer(function(layer) {
               var distance = e.latlng.distanceTo(layer.getLatLng())/1000; //distance in km
-              
+
               if(distance > 500) {
                   layer.setStyle({
                       stroke: false,
                       fill: false
-                  });  
+                  });
               } else {
                   layer.setStyle({
                       stroke: true,
-                      fill: true  
+                      fill: true
                   });
-              } 
+              }
           });
       });
-        
+
       // Bring in our coal layer
       var coalLayer = L.geoJson(plants, {
           pointToLayer: function(feature,latlng) {
               return L.circleMarker(latlng, commonStyles);
           },
-          filter: function(feature) { 
+          filter: function(feature) {
             if(feature.properties.fuel_source.Coal) {
                 return feature;
             }
@@ -194,49 +194,49 @@
           },
           onEachFeature : function (feature, layer) {
               var popUp = "<b>Plant Name: </b>" + feature.properties.plant_name + "<br>" + "<b>Plant Capacity: </b>" + feature.properties.capacity_mw.toLocaleString() + " MW" + "<br><br>" + "<u><b>" + "Fuel Type Breakdown:" + "</u></b><br>";
-              
+
               for (var source in feature.properties.fuel_source) {
                   popUp += "<b>" + source + ": </b>" + feature.properties.fuel_source[source].toLocaleString() + " MW" + ' '+ "<br>";
               }
               layer.bindPopup(popUp);
           }
       }).addTo(map);
-        
+
       // Filter out coal plants within 500km of click
       map.on('click', function(e) {
           coalLayer.eachLayer(function(layer) {
               var distance = e.latlng.distanceTo(layer.getLatLng())/1000; //distance in km
-              
+
               if(distance > 500) {
                   layer.setStyle({
                       stroke: false,
                       fill: false
-                  });  
+                  });
               } else {
                   layer.setStyle({
                       stroke: true,
-                      fill: true  
+                      fill: true
                   });
-              } 
+              }
           });
       });
-      
+
       // Function to create our proportional symbols
         function getRadius(val) {
           var radius = Math.sqrt(val/Math.PI);
           return radius * .8;
       }
-        
+
       // Creates toggle to allow user to choose layers to display
       var layersToDisplay = {
           "<b style='color:#0000ff'>Hydropower</b>": hydroLayer,
           "<b style='color:#ff0000'>Nuclear</b>": nuclearLayer,
           "<b style='color:#808080'>Coal</b>": coalLayer,
       }
-      
+
       L.control.layers(null, layersToDisplay, { collapsed:false }).addTo(map);
     </script>
-    
+
 </body>
 
 </html>
